@@ -92,14 +92,32 @@ class low_pass:
             imback3 = np.uint8(np.real(imback3))
             imback3[imback3 >= 225] = 0
 
+            H5 = 1 / (1 + (D / cutoff[3]) ** 2)
+            G5 = H5 * fourier_image
+            imback4 = np.fft.ifft2(G5)
+            imback4 = np.uint8(np.real(imback4))
+            imback4[imback4 >= 225] = 0
+
+            H6 = 1 / (1 + (D / cutoff[3]) ** 4)
+            G6 = H6 * fourier_image
+            imback5 = np.fft.ifft2(G6)
+            imback5 = np.uint8(np.real(imback5))
+            imback5[imback5 >= 225] = 0
+
             fig1 = Figure(figsize=(8, 8))
             fig1.suptitle("Butterworth lowpass Filter - No Ringing Effect")
             e = fig1.add_subplot(221)
-            e.set_title("Order = 1")
+            e.set_title("Order = 1, Cutoff = 40")
             e.imshow(imback2, cmap='gray')
             f = fig1.add_subplot(222)
-            f.set_title("Order = 2")
+            f.set_title("Order = 2, Cutoff = 40")
             f.imshow(imback3, cmap='gray')
+            g = fig1.add_subplot(223)
+            g.set_title("Order = 1, Cutoff = 10")
+            g.imshow(imback4, cmap='gray')
+            h = fig1.add_subplot(224)
+            h.set_title("Order = 2, Cutoff = 10")
+            h.imshow(imback5, cmap='gray')
 
             canvas = FigureCanvasTkAgg(fig1, self.frame3)
             canvas.get_tk_widget().grid(row=1, column=0, columnspan=4, rowspan=8)
