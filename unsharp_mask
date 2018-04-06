@@ -1,0 +1,105 @@
+import cv2
+from tkinter import *
+import matplotlib
+
+matplotlib.use('TkAgg')
+
+import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
+from tkinter import filedialog
+from PIL import Image, ImageTk
+
+
+class unsharp_highboost:
+    path = '/home/cloud/Desktop/moon.jpg'
+
+    def __init__(self, master):
+
+        self.frame2 = Frame(master)
+        self.frame1 = Frame(master)
+        self.frame3 = Frame(master)
+        self.frame4 = Frame(master)
+        self.frame5 = Frame(master)
+        self.frame6 = Frame(master)
+
+        self.initUI(master)
+
+    def initUI(self, master):
+        Label(master, text="Original Image", anchor="n").grid(row=0, column=0)
+        self.frame1.grid(row=1, column=0)
+        Label(master, text="k=0.5", anchor="n").grid(row=2, column=0)
+        self.frame2.grid(row=1, column=1)
+        Label(master, text="Blur", anchor="n").grid(row=0, column=1)
+        self.frame3.grid(row=1, column=2)
+        Label(master, text="k = 2", anchor="n").grid(row=2, column=1)
+        self.frame4.grid(row=3, column=1)
+        Label(master, text="k = Mask", anchor="n").grid(row=0, column=2)
+        self.frame5.grid(row=3, column=0)
+        self.frame6.grid(row=3, column=2)
+
+        if len(unsharp_highboost.path) > 0:
+            img = cv2.imread(unsharp_highboost.path)
+            img = cv2.resize(img, (0, 0), fx=0.25, fy=0.25)
+            blur = cv2.GaussianBlur(img, (5, 5), 0)
+            mask = img - blur
+            k = 2
+            new_weighted = img + k * mask
+
+            im = Image.fromarray(img)
+            imgtk = ImageTk.PhotoImage(im)
+            imglbl = Label(self.frame1, image=imgtk)
+            imglbl.image = imgtk
+            imglbl.grid(column=0)
+
+            im = Image.fromarray(blur)
+            imgtk = ImageTk.PhotoImage(im)
+            imglbl = Label(self.frame2, image=imgtk)
+            imglbl.image = imgtk
+            imglbl.grid(column=0)
+
+            im = Image.fromarray(mask)
+            imgtk = ImageTk.PhotoImage(im)
+            imglbl = Label(self.frame3, image=imgtk)
+            imglbl.image = imgtk
+            imglbl.grid(column=0)
+
+            im = Image.fromarray(new_weighted)
+            imgtk = ImageTk.PhotoImage(im)
+            imglbl = Label(self.frame4, image=imgtk)
+            imglbl.image = imgtk
+            imglbl.grid(column=0)
+
+            k = 0.5
+            new_weighted = img + k * mask
+            new_weighted.astype(int)
+            new_weighted = (new_weighted * 255 / np.max(new_weighted)).astype('uint8')
+
+            im = Image.fromarray(new_weighted)
+            imgtk = ImageTk.PhotoImage(im)
+            imglbl = Label(self.frame5, image=imgtk)
+            imglbl.image = imgtk
+            imglbl.grid(column=0)
+
+            hbtn = Button(self.frame6, text="OPEN IMAGE", command=lambda: self.button_click(master))
+            hbtn.pack(fill="none", expand=True)
+
+    def button_click(self, master):
+        unsharp_highboost.path = filedialog.askopenfilename(filetypes=[("Image File", '.jpg')])
+        if master is not None:
+            self.frame1.destroy()
+            self.frame2.destroy()
+            self.frame3.destroy()
+        self.initUI(master)
+
+
+def main():
+    root = Tk()
+    root.title("Unsharp masking and Highboost filter")
+    unsharp_highboost(root)
+    root.mainloop()
+
+
+if __name__ == '__main__':
+    main()
