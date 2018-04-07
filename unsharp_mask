@@ -17,27 +17,16 @@ class unsharp_highboost:
 
     def __init__(self, master):
 
-        self.frame2 = Frame(master)
         self.frame1 = Frame(master)
-        self.frame3 = Frame(master)
-        self.frame4 = Frame(master)
-        self.frame5 = Frame(master)
-        self.frame6 = Frame(master)
+        self.frame2 = Frame(master)
+        hbtn = Button(self.frame2, text="OPEN IMAGE", command=lambda: self.button_click(master))
+        hbtn.pack(fill="none", expand=True)
 
         self.initUI(master)
 
     def initUI(self, master):
-        Label(master, text="Original Image", anchor="n").grid(row=0, column=0)
-        self.frame1.grid(row=1, column=0)
-        Label(master, text="k=0.5", anchor="n").grid(row=2, column=0)
-        self.frame2.grid(row=1, column=1)
-        Label(master, text="Blur", anchor="n").grid(row=0, column=1)
-        self.frame3.grid(row=1, column=2)
-        Label(master, text="k = 2", anchor="n").grid(row=2, column=1)
-        self.frame4.grid(row=3, column=1)
-        Label(master, text="k = Mask", anchor="n").grid(row=0, column=2)
-        self.frame5.grid(row=3, column=0)
-        self.frame6.grid(row=3, column=2)
+        self.frame1.grid(row=0, column=0)
+        self.frame2.grid(row=7, column=0)
 
         if len(unsharp_highboost.path) > 0:
             img = cv2.imread(unsharp_highboost.path)
@@ -47,50 +36,34 @@ class unsharp_highboost:
             k = 2
             new_weighted = img + k * mask
 
-            im = Image.fromarray(img)
-            imgtk = ImageTk.PhotoImage(im)
-            imglbl = Label(self.frame1, image=imgtk)
-            imglbl.image = imgtk
-            imglbl.grid(column=0)
-
-            im = Image.fromarray(blur)
-            imgtk = ImageTk.PhotoImage(im)
-            imglbl = Label(self.frame2, image=imgtk)
-            imglbl.image = imgtk
-            imglbl.grid(column=0)
-
-            im = Image.fromarray(mask)
-            imgtk = ImageTk.PhotoImage(im)
-            imglbl = Label(self.frame3, image=imgtk)
-            imglbl.image = imgtk
-            imglbl.grid(column=0)
-
-            im = Image.fromarray(new_weighted)
-            imgtk = ImageTk.PhotoImage(im)
-            imglbl = Label(self.frame4, image=imgtk)
-            imglbl.image = imgtk
-            imglbl.grid(column=0)
+            fig = Figure(figsize=(8, 8))
+            a = fig.add_subplot(231)
+            a.imshow(img, cmap='gray')
+            a.set_title("Original Image")
+            b = fig.add_subplot(232)
+            b.imshow(blur, cmap='gray')
+            b.set_title("Average Filter - blur")
+            c = fig.add_subplot(233)
+            c.imshow(mask, cmap='gray')
+            c.set_title("Mask")
+            d = fig.add_subplot(235)
+            d.imshow(new_weighted, cmap='gray')
+            d.set_title("k = 2")
 
             k = 0.5
             new_weighted = img + k * mask
             new_weighted.astype(int)
             new_weighted = (new_weighted * 255 / np.max(new_weighted)).astype('uint8')
 
-            im = Image.fromarray(new_weighted)
-            imgtk = ImageTk.PhotoImage(im)
-            imglbl = Label(self.frame5, image=imgtk)
-            imglbl.image = imgtk
-            imglbl.grid(column=0)
-
-            hbtn = Button(self.frame6, text="OPEN IMAGE", command=lambda: self.button_click(master))
-            hbtn.pack(fill="none", expand=True)
+            e = fig.add_subplot(234)
+            e.imshow(new_weighted, cmap='gray')
+            e.set_title("k=0.5")
+            canvas = FigureCanvasTkAgg(fig, self.frame1)
+            canvas.get_tk_widget().grid(row=1, column=0, columnspan=4, rowspan=8)
+            canvas.draw()
 
     def button_click(self, master):
         unsharp_highboost.path = filedialog.askopenfilename(filetypes=[("Image File", '.jpg')])
-        if master is not None:
-            self.frame1.destroy()
-            self.frame2.destroy()
-            self.frame3.destroy()
         self.initUI(master)
 
 
